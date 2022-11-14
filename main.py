@@ -174,17 +174,17 @@ def get_args_parser():
     parser.add_argument('--nchannel', type=int, default=1, help='nChannel (default: 1)')
     parser.add_argument('--genotype', default="", help='Cell Architech (default: "")')
     parser.add_argument('--teacher', type=str, default='resnet34', help='path of ImageNet')
-
+    parser.add_argument('--load', type=bool, default=False, help='True for Step2')
 
 
     # distributed training parameters
     parser.add_argument('--world_size', default=1, type=int,
                         help='number of distributed processes')
     parser.add_argument('--dist_url', default='env://', help='url used to set up distributed training')
-    parser.add_argument('--root_dir_train', default='/mnt/lustre/share/images/train', type=str, help='dataset path')
-    parser.add_argument('--meta_file_train', default='/mnt/lustre/share/images/meta/train.txt', type=str, help='dataset path')
-    parser.add_argument('--root_dir_val', default='/mnt/lustre/share/images/val/', type=str, help='dataset path')
-    parser.add_argument('--meta_file_val', default='/mnt/lustre/share/images/meta/val.txt', type=str, help='dataset path')
+    parser.add_argument('--root_dir_train', default='/mnt/lustre/share_data/futianwen/images/train', type=str, help='dataset path')
+    parser.add_argument('--meta_file_train', default='/mnt/lustre/share_data/futianwen/images/meta/train.txt', type=str, help='dataset path')
+    parser.add_argument('--root_dir_val', default='/mnt/lustre/share_data/futianwen/images/val/', type=str, help='dataset path')
+    parser.add_argument('--meta_file_val', default='/mnt/lustre/share_data/futianwen/images/meta/val.txt', type=str, help='dataset path')
     return parser
 
 
@@ -270,7 +270,10 @@ def main(args):
     Genotype = args.genotype
     genotype = genotypes.genotype_array[Genotype]
     model = Network(args.init_channels, args.nb_classes, args.layers, args.auxiliary, genotype, binary=True)
-
+    if args.load:
+        print('!!!!!!!!!!!!!LOAD!!!!!!!!!!!!!!!')
+        checkpoint = torch.load('DDPNAS_MCN_2_step1_MConv/checkpoint.pth', map_location='cpu')
+        model.load_state_dict(checkpoint['model'])
 
     if args.finetune:
         if args.finetune.startswith('https'):
